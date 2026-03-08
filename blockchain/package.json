@@ -1,0 +1,20 @@
+{
+  "name": "scamshield-blockchain",
+  "version": "1.0.0",
+  "description": "Smart contracts for ScamShield AI blockchain registry",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:polygon": "npx hardhat run scripts/deploy.js --network polygon_testnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

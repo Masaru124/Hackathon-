@@ -1,0 +1,71 @@
+{
+  "address": "0x0000000000000000000000000000000000000000000",
+  "abi": [
+    {
+      "inputs": [
+        {"name": "messageHash", "type": "string"},
+        {"name": "url", "type": "string"},
+        {"name": "scamScore", "type": "uint256"}
+      ],
+      "name": "reportScam",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"name": "messageHash", "type": "string"}],
+      "name": "getScamReport",
+      "outputs": [
+        {
+          "components": [
+            {"name": "messageHash", "type": "string"},
+            {"name": "url", "type": "string"},
+            {"name": "scamScore", "type": "uint256"},
+            {"name": "reporter", "type": "address"},
+            {"name": "timestamp", "type": "uint256"}
+          ],
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllReports",
+      "outputs": [
+        {
+          "components": [
+            {"name": "messageHash", "type": "string"},
+            {"name": "url", "type": "string"},
+            {"name": "scamScore", "type": "uint256"},
+            {"name": "reporter", "type": "address"},
+            {"name": "timestamp", "type": "uint256"}
+          ],
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStatistics",
+      "outputs": [
+        {
+          "components": [
+            {"name": "totalReports", "type": "uint256"},
+            {"name": "uniqueReporters", "type": "uint256"},
+            {"name": "averageScamScore", "type": "uint256"}
+          ],
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}
