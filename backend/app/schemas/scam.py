@@ -9,6 +9,34 @@ class ScanRequest(BaseModel):
 class BatchScanRequest(BaseModel):
     items: List[ScanRequest] = Field(..., max_items=10, description="Items to analyze")
 
+class ScamReportCreate(BaseModel):
+    message_hash: str = Field(..., description="SHA256 hash of the message")
+    original_message: str = Field(..., max_length=2000, description="Original message content")
+    url: Optional[str] = Field(None, max_length=500, description="Suspicious URL if any")
+    scam_score: float = Field(..., ge=0, le=100, description="Scam probability score")
+    risk_level: str = Field(..., description="Risk level classification")
+    flagged_keywords: List[str] = Field(default_factory=list, description="Suspicious keywords found")
+    flagged_urls: List[str] = Field(default_factory=list, description="Suspicious URLs found")
+    explanation: str = Field(..., description="AI explanation of the analysis")
+    reporter_wallet: str = Field(..., description="Reporter's wallet address")
+    reporter_ip: str = Field(..., description="Reporter's IP address")
+    user_agent: Optional[str] = Field(None, description="Reporter's user agent")
+    category: str = Field(default="other", description="Scam category")
+
+class ScamReportResponse(BaseModel):
+    id: int
+    message_hash: str
+    scam_score: float
+    risk_level: str
+    flagged_keywords: List[str]
+    flagged_urls: List[str]
+    explanation: str
+    category: str
+    status: str
+    report_count: int
+    blockchain_confirmed: bool
+    created_at: datetime
+
 class ReportRequest(BaseModel):
     message: str = Field(..., max_length=2000)
     url: Optional[str] = Field(None, max_length=500)

@@ -121,8 +121,16 @@ class AIService:
                     
                     # Get model prediction
                     results = self.pipeline(text)
-                    scam_prob = next(r['score'] for r in results[0] if r['label'] == 'LABEL_1')
-                    ai_score = scam_prob * 100  # Convert to percentage
+                    if results and len(results) > 0 and len(results[0]) > 0:
+                        # Find the scam probability (LABEL_1 typically represents positive class)
+                        scam_prob = 0
+                        for result in results[0]:
+                            if result['label'] == 'LABEL_1' or result['label'] == 'POSITIVE':
+                                scam_prob = result['score']
+                                break
+                        ai_score = scam_prob * 100  # Convert to percentage
+                    else:
+                        ai_score = 0
                     
                 except Exception as e:
                     logger.warning(f"AI model prediction failed: {e}")

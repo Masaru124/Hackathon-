@@ -10,9 +10,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     
-    # Database settings
-    MONGODB_URL: str = "mongodb://localhost:27017"
-    DATABASE_NAME: str = "scamshield"
+    # Database settings (Neon PostgreSQL only)
+    DATABASE_URL: str = "postgresql://username:password@host:port/database_name"
     
     # AI Model settings
     MODEL_NAME: str = "distilbert-base-uncased"

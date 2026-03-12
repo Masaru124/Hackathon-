@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from typing import List
 import logging
@@ -6,15 +6,21 @@ import logging
 from app.schemas.scam import ScanRequest, BatchScanRequest, ScanResponse
 from app.services.ai_service import AIService
 from app.core.database import get_db
-from app.models.scam_report import ScamReportModel
+from app.services.postgres_service import PostgresService
+from app.models.postgres_models import ScamReport
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Dependency injection
+postgres_service = PostgresService()
+
 @router.post("/scan", response_model=ScanResponse)
 async def scan_message(
     request: ScanRequest,
-    req: Request
+    req: Request,
+    db: AsyncSession = Depends(get_db)
 ):
     """Scan message for scam detection"""
     try:
@@ -24,22 +30,21 @@ async def scan_message(
         # Analyze message
         result = await ai_service.analyze_message(request.message, request.url or "")
         
-        # Check if already exists in database
-        db = await get_db()
-        existing_report = await db.scam_reports.find_one({"message_hash": result["message_hash"]})
+        # Check if already exists in database (PostgreSQL)
+        existing_report = await postgres_service.get_scam_report_by_hash(db, result["message_hash"])
         
         response = ScanResponse(
             success=True,
             **result,
             is_new=existing_report is None,
-            existing_reports=existing_report["report_count"] if existing_report else 0
+            existing_reports=existing_report.report_count if existing_report else 0
         )
         
         # Add additional context if existing report found
         if existing_report:
-            response.blockchain_confirmed = existing_report.get("blockchain_confirmed", False)
-            response.category = existing_report.get("category", "other")
-            response.status = existing_report.get("status", "pending")
+            response.blockchain_confirmed = existing_report.blockchain_confirmed
+            response.category = existing_report.category
+            response.status = existing_report.status
         
         return response
         

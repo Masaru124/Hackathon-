@@ -1,47 +1,49 @@
-from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Request, BackgroundTasks, Depends
 from typing import List
 import logging
 
 from app.schemas.scam import ReportRequest, BatchReportRequest, ReportResponse
 from app.services.ai_service import AIService
 from app.services.blockchain_service import BlockchainService
+from app.services.postgres_service import PostgresService
 from app.core.database import get_db
 from app.models.scam_report import ScamReportModel
+from app.models.postgres_models import ScamReport
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Dependency injection
+postgres_service = PostgresService()
+
 @router.post("/", response_model=ReportResponse)
 async def report_scam(
     request: ReportRequest,
     req: Request,
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
 ):
     """Report a scam"""
     try:
-        db = await get_db()
-        
-        # Check if report already exists
-        existing_report = await db.scam_reports.find_one({"message_hash": request.message_hash})
+        # Check if report already exists in PostgreSQL
+        existing_report = await postgres_service.get_scam_report_by_hash(db, request.message_hash)
         
         if existing_report:
             # Increment report count for existing report
-            await db.scam_reports.update_one(
-                {"message_hash": request.message_hash},
-                {
-                    "$inc": {"report_count": 1},
-                    "$set": {"updated_at": datetime.utcnow()}
-                }
-            )
+            await postgres_service.update_scam_report(db, request.message_hash, {
+                "report_count": existing_report.report_count + 1,
+                "updated_at": datetime.utcnow()
+            })
             
             return ReportResponse(
                 success=True,
                 message="Report already exists, count incremented",
                 data={
-                    "reportId": str(existing_report["_id"]),
-                    "reportCount": existing_report["report_count"] + 1,
-                    "blockchainConfirmed": existing_report.get("blockchain_confirmed", False)
+                    "reportId": str(existing_report.id),
+                    "reportCount": existing_report.report_count + 1,
+                    "blockchainConfirmed": existing_report.blockchain_confirmed
                 }
             )
         
