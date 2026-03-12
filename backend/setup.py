@@ -1,0 +1,30 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="scamshield-backend",
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        "fastapi>=0.135.0",
+        "uvicorn>=0.41.0",
+        "pydantic>=2.12.0",
+        "pydantic-settings>=2.13.0",
+        "python-multipart>=0.0.22",
+        "python-jose[cryptography]>=3.5.0",
+        "passlib[bcrypt]>=1.7.4",
+        "python-dotenv>=1.2.2",
+        "transformers>=5.3.0",
+        "torch>=2.10.0",
+        "numpy>=2.4.0",
+        "scikit-learn>=1.8.0",
+        "pandas>=3.0.0",
+        "aiofiles>=25.1.0",
+        "httpx>=0.28.0",
+        "web3>=7.14.0",
+        "redis>=7.3.0",
+        "celery>=5.6.0",
+        "sqlalchemy>=2.0.48",
+        "asyncpg>=0.31.0",
+    ],
+    python_requires=">=3.8",
+)
