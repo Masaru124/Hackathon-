@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: scamshield-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/scamshield
+      - REDIS_URL=redis://redis:6379
+      - BLOCKCHAIN_RPC_URL=https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID
+      - CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000000
+      - PRIVATE_KEY=your_private_key_here
+      - JWT_SECRET_KEY=dev_jwt_secret_key_here
+      - ENVIRONMENT=development
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - scamshield-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: scamshield-mongodb-dev
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=scamshield
+    volumes:
+      - mongodb_dev_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
+    networks:
+      - scamshield-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: scamshield-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+    networks:
+      - scamshield-network
+
+  # MongoDB GUI (optional for development)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: scamshield-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    depends_on:
+      - mongodb
+    networks:
+      - scamshield-network
+
+volumes:
+  mongodb_dev_data:
+  redis_dev_data:
+
+networks:
+  scamshield-network:
+    driver: bridge
